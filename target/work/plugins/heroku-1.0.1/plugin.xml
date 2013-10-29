@@ -1,0 +1,27 @@
+<plugin name='heroku' version='1.0.1' grailsVersion='1.3.3 &gt; *'>
+  <author>Burt Beckwith</author>
+  <authorEmail>beckwithb@vmware.com</authorEmail>
+  <title>Heroku Integration</title>
+  <description>Heroku Integration</description>
+  <documentation>http://grails.org/plugin/heroku</documentation>
+  <type>HerokuGrailsPlugin</type>
+  <resources>
+    <resource>grails.plugin.heroku.HerokuTagLib</resource>
+  </resources>
+  <repositories>
+    <repository name='grailsCentral' url='http://plugins.grails.org' />
+    <repository name='http://repo.grails.org/grails/plugins' url='http://repo.grails.org/grails/plugins/' />
+    <repository name='http://repo.grails.org/grails/core' url='http://repo.grails.org/grails/core/' />
+    <repository name='grailsCore' url='http://svn.codehaus.org/grails/trunk/grails-plugins' />
+    <repository name='mavenCentral' url='http://repo1.maven.org/maven2/' />
+  </repositories>
+  <dependencies />
+  <plugins>
+    <compile>
+      <plugin group='org.grails.plugins' name='cloud-support' version='1.0.8' />
+      <plugin group='org.grails.plugins' name='database-session' version='1.1.2' />
+    </compile>
+  </plugins>
+  <runtimePluginRequirements />
+  <behavior />
+</plugin>

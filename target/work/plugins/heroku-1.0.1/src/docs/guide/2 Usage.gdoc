@@ -1,0 +1,54 @@
+The first step is to install the plugin:
+
+{code}
+grails install-plugin heroku
+{code}
+
+h4. Configuration
+
+There is currently only one configuration option for the plugin, specified in Config.groovy:
+
+{table}
+*Property* | *Default* | *Meaning*
+grails.plugin.heroku.datasource. disableTimeoutAutoconfiguration | @false@  | disables auto-configuration of DataSource connection timeout checking if @true@
+{table}
+
+h4. Creating an application
+
+The general steps for creating a Grails application are (not necessarily in order):
+* create and develop the application like any other application
+* install the @heroku@ plugin
+* install the @mongodb@, @redis-gorm@, @rabbitmq@, and/or @memcached@ plugins depending on which Heroku services you'll be using
+* add the Heroku services you'll be using from the web interface ([http://addons.heroku.com/|http://addons.heroku.com/]) or with the @heroku addons:add@ command
+* create a local Git repo and commit your application files to it
+* create the application on Heroku with the @heroku create@ command
+* deploy the application to Heroku's servers using @git push@
+
+See the tutorial in the next section for a detailed walkthrough of the required and optional steps.
+
+h4. Using the Spring Security Core plugin
+
+There are a few things to be aware of when using the spring-security-core plugin with Heroku. One is that as of this writing, there's no support at Heroku for session affinity or clustered sessions. So if you run more than one instance of your application, your authentications will tend to fail since after successfully authenticating you will most likely be redirected to another instance with a new HTTP session without the authentication. Even if this doesn't happen immediately, at some point you're likely to land on another instance and have to log in again. One option you can use to get around this limitation is to use the [database-session|http://grails.org/plugin/database-session] plugin. This stores session data in the database and trades having a single shared session across all instances for a (hopefully) small increase in database access. The plugin is new and hasn't been extensively tested, so make sure it works for your use cases before using it in an important application.
+
+Another is a more general problem with plugin dependencies that affects the spring-security-core plugin in Grails 2.0 applications. Due to changes in plugin resolution for 2.0, when the war is built the installed plugins' dependent plugins won't be resolved. So the webxml plugin that the spring-security-core plugin depends on won't be resolved and you'll see IllegalStateExceptions for all requests. This is the same issue that requires that you explicitly declare a dependency on the cloud-support plugin (see the tutorials for examples of this). The workaround is simple; just declare an explicit dependency for all plugins that would otherwise be transitively installed, e.g.
+
+{code}
+plugins {
+   ...
+
+   compile ':spring-security-core:1.2.7.2'
+   compile ':webxml:1.4.1'
+   compile ':heroku:1.0'
+   compile ':cloud-support:1.0.8'
+}
+{code}
+
+If you're using 1.3.7 you can omit the webxml and cloud-support dependencies since they'll be resolved, but it doesn't hurt to have them there and will make upgrading to 2.0 easier.
+
+A third issue has to do with SSL and channel security. Heroku uses F5 BIG-IP load balancers that affect how SSL is managed, so the default behavior of checking if a request is secure or insecure won't work. To address this just add a property in Config.groovy to enable checking for the request header value that their load balancers add:
+
+{code}
+grails.plugins.springsecurity.secureChannel.useHeaderCheckChannelSecurity = true
+{code}
+
+This feature is only available in version 1.2.7.2 and higher of the spring-security-core plugin, so be sure to upgrade if you're using an older version.
